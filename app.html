@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Calc</title>
+  <script src="calculator.js"></script>
+  <script src="jquery-1.7.1.min.js"></script>
+  <script src="knockout-2.0.0.js"></script>
+  <script src="app.js"></script>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <h1>Calc</h1>
+
+  <div class="notebook">
+    <div class="rows" data-bind="template: {name: 'tmpl-row', foreach: rows}"></div>
+  </div>
+
+  <script type="text/html" id="tmpl-row">
+    <div class="row" data-bind="css: { selected: isSelected }">
+      <div class="raw">
+        <input data-bind="
+            value: raw,
+            event: { keypress: $parent.keyPressed },
+            valueUpdate: 'afterkeydown',
+            hasFocus: $parent.rowHasFocus">
+        = <span class="computed" data-bind="text: computed"></span>
+      </div>
+    </div>
+  </script>
+
+  <script>
+    var notebook = new Notebook();
+    notebook.rows.push(new Row(notebook, "3 + 4"));
+    ko.applyBindings(notebook);
+  </script>
+</body>
+</html>
