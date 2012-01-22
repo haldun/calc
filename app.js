@@ -1,8 +1,15 @@
-var Notebook = function() {
+var Notebook = function(data) {
   var self = this;
 
+  this.name = ko.observable(data.name || "Untitled");
   this.rows = ko.observableArray([]);
   this.selectedRow = ko.observable(null);
+
+  if (data.rows) {
+    ko.utils.arrayForEach(data.rows, function(rowData) {
+      self.rows.push(new Row(self, rowData));
+    });
+  }
 
   self.keyPressed = function(sender, event) {
     if (event.keyCode === 13) {
@@ -18,32 +25,41 @@ var Notebook = function() {
     self.selectedRow(row);
   };
 
-  self.rowHasFocus = function(row) {
-    return row === self.selectedRow();
+  self.selectRow = function(row) {
+    self.selectedRow(row);
   };
 };
 
-var Row = function(notebook, raw) {
+var Row = function(notebook, input) {
   var self = this;
-
   this.notebook = notebook;
-  this.raw = ko.observable(raw);
-
-  this.computed = ko.computed(function(){
+  this.input = ko.observable(input);
+  this.computed = ko.observable(false);
+  this.index = ko.computed(function(){
+    return ko.utils.arrayIndexOf(self.notebook.rows(), self) + 1;
+  }, this);
+  this.isSelected = ko.computed({
+    read: function() {
+      return self === self.notebook.selectedRow();
+    },
+    write: function(value) {
+      if (value) {
+        self.notebook.selectedRow(self);
+      }
+    }
+  });
+  this.answer = ko.computed(function(){
     try {
-      return calculator.parse(ko.utils.unwrapObservable(self.raw));
+      self.computed(true);
+      return calculator.parse(ko.utils.unwrapObservable(self.input));
     } catch(e) {
       return 0;
     }
-  });
-
-  this.isSelected = ko.computed(function() {
-    return self === self.notebook.selectedRow();
-  });
+  }, this);
 };
 
 Row.prototype.toJSON = function() {
   return {
-    raw: this.raw
+    input: this.input
   };
 };

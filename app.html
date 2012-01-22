@@ -7,32 +7,66 @@
   <script src="jquery-1.7.1.min.js"></script>
   <script src="knockout-2.0.0.js"></script>
   <script src="app.js"></script>
+  <link rel="stylesheet" href="bootstrap.min.css">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <h1>Calc</h1>
 
-  <div class="notebook">
-    <div class="rows" data-bind="template: {name: 'tmpl-row', foreach: rows}"></div>
-  </div>
-
-  <script type="text/html" id="tmpl-row">
-    <div class="row" data-bind="css: { selected: isSelected }">
-      <div class="raw">
-        <input data-bind="
-            value: raw,
-            event: { keypress: $parent.keyPressed },
-            valueUpdate: 'afterkeydown',
-            hasFocus: $parent.rowHasFocus">
-        = <span class="computed" data-bind="text: computed"></span>
+<div class="container">
+  <div class="content">
+    <div class="page-header row">
+      <div class="pull-left"><h1>Calc</h1></div>
+    </div>
+    <div class="row">
+      <div class="span10 main-content">
+        <h2 data-bind="text: name"></h2>
+        <div class="rows" data-bind="template: {name: 'tmpl-row', foreach: rows}"></div>
+      </div>
+      <div class="span6 sidebar">
+        Variables here
       </div>
     </div>
-  </script>
+    <div>
+      <hr>
+      <h5>Notebook Structure</h5>
+      <pre data-bind="text: $root.notebookJSON"></pre>
+    </div>
+  </div>
+</div>
 
-  <script>
-    var notebook = new Notebook();
-    notebook.rows.push(new Row(notebook, "3 + 4"));
-    ko.applyBindings(notebook);
-  </script>
+<footer class="footer">
+  <div class="container">
+    <h6>Keyboard shortcuts</h6>
+    <ul>
+      <li><strong>j</strong> Select next field</li>
+      <li><strong>k</strong> Select previous field</li>
+      <li><strong>DEL or BACKSPACE</strong> Delete selected field</li>
+    </ul>
+  </div>
+</footer>
+
+<script type="text/html" id="tmpl-row">
+  <div class="r row" data-bind="click: $root.selectRow, css: { selected: isSelected }">
+    <div class="span1">
+      <span class="label warning" data-bind="text: index"></span>
+    </div>
+    <div class="span9">
+      <input data-bind="
+          value: input,
+          hasfocus: isSelected,
+          event: { keypress: $parent.keyPressed, focus: $root.selectRow },
+          valueUpdate: 'afterkeydown'">
+      <div class="computed" data-bind="if: computed">
+        = <span data-bind="text: answer"></span>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script>
+  var notebookData = {name: "My first notebook", rows: ["1 + 1"]};
+  var notebook = new Notebook(notebookData);
+  ko.applyBindings(notebook);
+</script>
 </body>
 </html>
